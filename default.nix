@@ -14,7 +14,13 @@
   modules = import ./modules; # NixOS modules
   overlays = import ./overlays; # nixpkgs overlays
 
-  example-package = pkgs.callPackage ./pkgs/example-package { };
+  bcachefs-tools = pkgs.callPackage ./pkgs/bcachefs-tools { };
+  bcachefs-kernel = pkgs.callPackage ./pkgs/bcachefs-kernel {
+    kernelPatches = [
+      pkgs.kernelPatches.bridge_stp_helper
+      pkgs.kernelPatches.request_key_helper
+    ];
+  };
   # some-qt5-package = pkgs.libsForQt5.callPackage ./pkgs/some-qt5-package { };
   # ...
 }
