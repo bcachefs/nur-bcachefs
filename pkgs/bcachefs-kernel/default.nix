@@ -19,7 +19,7 @@ buildLinux (args // rec {
       url = "mirror://kernel/linux/kernel/v5.x/linux-${kernelVersion}.tar.xz";
       sha256 = "0yxbcd1k4l4cmdn0hzcck4s0yvhvq9fpwp120dv9cz4i9rrfqxz8";
     };
-    kernelPatches = oldPatches ++ [ {
+    kernelPatches = let patch = {
       name = "bcachefs-${commit}";
       patch = fetchpatch {
         name = "bcachefs-${commit}.diff";
@@ -27,5 +27,6 @@ buildLinux (args // rec {
         sha256 = diffHash;
       };
       extraConfig = "BCACHEFS_FS m";
-    } ];
+        # fix util pull/124486 is merged
+    }; in [patch] ++ lib.remove patch oldPatches;
 } // (args.argsOverride or {  }))
