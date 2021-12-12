@@ -70,6 +70,6 @@ jobs:
       # TODO switch to default nixpkgs channel once nix-build-uncached 1.0.0 is in stable
       run: nix run 'nixpkgs#nix-build-uncached' -- ci.nix -A cacheOutputs
     - name: Trigger NUR update
-      # Don't replace yo-nur here!
-      if: ${{ matrix.nurRepo != 'yo-nur' }}
+      # Don't replace <YOUR_REPO_NAME> here!
+      if: ${{ matrix.nurRepo != '<YOUR_REPO_NAME>' }}
       run: curl -XPOST "https://nur-update.herokuapp.com/update?repo=${{ matrix.nurRepo }}"
