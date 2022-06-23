@@ -7,7 +7,6 @@ on:
   pull_request:
   push:
     branches:
-      - main
       - master
   schedule:
     # rebuild everyday at 2:51
@@ -16,6 +15,7 @@ on:
     - cron:  '3 10 * * *'
 jobs:
   tests:
+    continue-on-error: true
     strategy:
       matrix:
         # Set this to notify the global nur package registry that changes are
@@ -38,9 +38,9 @@ jobs:
         cachixName:
           - yo-nur
         nixPath:
-          - nixpkgs=channel:nixos-unstable
-          - nixpkgs=channel:nixpkgs-unstable
-          - nixpkgs=channel:nixos-21.11
+          - nixos-unstable
+          - nixpkgs-unstable
+          - nixos-22.05
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -48,7 +48,7 @@ jobs:
     - name: Install nix
       uses: cachix/install-nix-action@v17
       with:
-        nix_path: "${{ matrix.nixPath }}"
+        nix_path: "nixpkgs=channel:${{ matrix.nixPath }}"
         # nix 2.6 breaks restrict-eval, when using the NIX_PATH
         # see https://github.com/NixOS/nix/issues/5980
         install_url: https://releases.nixos.org/nix/nix-2.5.1/install
@@ -67,6 +67,10 @@ jobs:
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - name: Pull new bcachefs version
       run: |
+        git config --global user.name 'GithubAction'
+        git config --global user.email 'action@gluo.nz'
+        git checkout "${{ matrix.nixPath }}"
+        git reset master --hard
         ./update.sh
     - name: Check evaluation
       run: |
@@ -93,8 +97,6 @@ jobs:
       run: curl -XPOST "https://nur-update.herokuapp.com/update?repo=${{ matrix.nurRepo }}"
     - name: Push to master
       run: |
-        git config --global user.name 'GithubAction'
-        git config --global user.email 'action@gluo.nz'
         git commit -am 'Automated update'
         git push
       continue-on-error: true
